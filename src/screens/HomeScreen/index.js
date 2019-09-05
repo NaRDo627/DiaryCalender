@@ -7,6 +7,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import InputScreen from '../InputScreen';
 
 class HeaderBar extends Component {
     render() {
@@ -70,7 +71,7 @@ export default class HomeScreen extends Component{
             //Heading text color
             headerTintColor: navigation.getParam('HeaderTintColor', '#fff'),
             headerRight: (
-                <TouchableOpacity onPress={() => navigation.navigate('SettingScreen')}>
+                <TouchableOpacity onPress={() => navigation.navigate('InputScreen')}>
                     <Text
                         style={{
                             color: 'white',

@@ -8,6 +8,7 @@ import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
 import SettingScreen from './SettingScreen';
 import SomethingScreen from './SomethingScreen';
+import InputScreen from './InputScreen';
 
 const HomeStack = createStackNavigator(
     {
@@ -21,6 +22,21 @@ const HomeStack = createStackNavigator(
         }),
     }
 );
+
+const InputStack = createStackNavigator(
+    {
+        InputScreen
+    },
+    // if you need.
+    // recommend custom header
+    {
+        defaultNavigationOptions: ({navigation}) => ({
+            title: 'Input',
+        }),
+        initialRouteName: 'InputScreen',
+    }
+);
+
 const SettingStack = createStackNavigator(
     {
         SettingScreen,
@@ -68,7 +84,7 @@ const TabNavigator = createBottomTabNavigator(
 const AppStack = createStackNavigator(
     {
         HomeScreen: HomeScreen,
-        SettingScreen: SettingScreen
+        InputScreen: InputScreen,
       /*
         TabNavigator: {
             screen: TabNavigator,
@@ -77,6 +93,9 @@ const AppStack = createStackNavigator(
             }),
         },
         */
+    },
+    {
+        initialRouteName: "HomeScreen"
     }
 );
 
