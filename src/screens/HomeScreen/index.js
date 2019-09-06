@@ -30,26 +30,7 @@ export default class HomeScreen extends Component{
 
     static navigationOptions = ({ navigation }) => {
         //return header with Custom View which will replace the original header
-        return {/*
-            headerTitle: (
-                <View
-                    style={{
-                        height: 45,
-                        backgroundColor: 'red',
-                        justifyContent: 'center',
-                        flex: 1,
-                    }}>
-                    <Text
-                        style={{
-                            color: 'white',
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontSize: 18,
-                        }}>
-                        This is Custom Header
-                    </Text>
-                </View>
-            ),*/
+        return {
             headerTitle: <HeaderBar />,
             //Heading style
             headerStyle: {
@@ -79,7 +60,9 @@ export default class HomeScreen extends Component{
 
     componentDidMount() {
         const { navigation } = this.props;
-      //  AsyncStorage.clear();
+
+        // 스토리지 내용 비울려면 이 주석 제거
+       // AsyncStorage.clear();
         this.loadItems();
         this.focusListener = navigation.addListener('didFocus', () => {
             this.loadItems();
@@ -93,11 +76,10 @@ export default class HomeScreen extends Component{
 
     loadItems() {
         AsyncStorage.getItem("MemoItems", (err, value) => {
-            if(err != null){
-                AsyncStorage.setItem("MemoItems", {}, () => {});
+            if(value == null || err != null){
+                AsyncStorage.setItem("MemoItems", JSON.stringify({}), () => {});
                 return;
             }
-
 
             this.setState({
                 memoItems: JSON.parse(value)
@@ -121,16 +103,14 @@ export default class HomeScreen extends Component{
                                 memoItems[key].memoText.replace(/\n/g, " ").substr(0, 10) + "..." : memoItems[key].memoText
 
                             const date = new Date(Number(key));
-                            console.log(date)
-                            // const dateString = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDay() + " " +
-                            // date.getHours() + ":" + date.getMinutes();
 
                             const dateString = date.toString().substr(0, 21);
+                            const tagColor = (memoItems[key].tags == null)? "#F0F0F0" : (memoItems[key].tags === "good")? "#46c3ad": "#FACCCC";
 
                             return (
                                 <View style={styles.wrapContent} key={key}>
                                     <TouchableOpacity
-                                        style={styles.content}
+                                        style={{...styles.content, backgroundColor: tagColor}}
                                         onPress={() => navigation.navigate('InputScreen', { itemId: key })}>
                                         <View>
                                             <Text>{memoPreview}</Text>
