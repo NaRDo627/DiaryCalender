@@ -5,34 +5,115 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    AsyncStorage
 } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import {ScrollView} from 'react-navigation';
 
 export default class InputScreen extends Component{
+    state = {
+        memo: "",
+        itemId: this.props.navigation.getParam('itemId', null)
+    }
 
     /*static navigationOptions = {
         header: null,
     };*/
 
     _saveMemo(){
-        // do something
-        // this.props.navigation.replace('TabNavigator')
-        alert("메모가 저장되었습니다.");
-        this.props.navigation.goBack(null);
+        // itemId는 현재시간
+        const itemId = (this.state.itemId == null)? new Date().getTime() : this.state.itemId;
+        const memoItem = {
+            memoText: this.state.memo
+        }
+
+        AsyncStorage.getItem("MemoItems", (err, value) => {
+            if(err != null) {
+                alert("잠시후 다시 시도해주세요.")
+                return;
+            }
+            let newMemoItems = JSON.parse(value)
+            // const newMemoItems = { [itemId]: memoItem, ...oldMemoItems }
+
+            if (!newMemoItems[itemId]) {
+                const oldMemoItems = newMemoItems;
+                newMemoItems = { [itemId]: memoItem, ...oldMemoItems }
+            }
+            else {
+                Object.assign(newMemoItems[itemId], memoItem);
+            }
+
+            AsyncStorage.setItem("MemoItems", JSON.stringify(newMemoItems), () => {
+                alert("메모가 저장되었습니다.");
+                this.props.navigation.goBack(null);
+            })
+        })
+    }
+
+    _deleteMemo() {
+        if(this.state.itemId == null)
+            return;
+
+        const { itemId } = this.state;
+
+        AsyncStorage.getItem("MemoItems", (err, value) => {
+            if(err != null) {
+                alert("잠시후 다시 시도해주세요.")
+                return;
+            }
+            let memoItems = JSON.parse(value)
+            // const newMemoItems = { [itemId]: memoItem, ...oldMemoItems }
+
+            delete memoItems[itemId]
+
+            AsyncStorage.setItem("MemoItems", JSON.stringify(memoItems), () => {
+                alert("메모가 삭제되었습니다.");
+                this.props.navigation.goBack(null);
+            })
+        })
+    }
+
+    _handleInput = text => {
+        this.setState({ memo: text })
+    }
+
+    componentDidMount(): void {
+        if(this.state.itemId == null)
+            return;
+
+        const { itemId } = this.state;
+
+        AsyncStorage.getItem("MemoItems", (err, value) => {
+            if(err != null) {
+                alert("잠시후 다시 시도해주세요.")
+                return;
+            }
+            const memoItems = JSON.parse(value)
+
+            this.setState({
+                memo: memoItems[itemId].memoText
+            })
+        })
     }
 
     render(){
+        const { navigation } = this.props;
+
         return (
-            <KeyboardAvoidingView style={styles.container}>
+            <ScrollView style={styles.container}>
                 <View style={styles.titleArea}>
-                    <Text style={styles.title}>Memo 추가</Text>
+                    <Text style={styles.title}>Diary</Text>
                 </View>
-                <View style={styles.formArea}>
+                <KeyboardAvoidingView style={styles.formArea}>
                     <TextInput
                         style={styles.textForm}
-                        placeholder={"Input Memo"}/>
-                </View>
+                        value={this.state.memo}
+                        onChangeText={this._handleInput}
+                        multiline = {true}
+                        numberOfLines = {100}
+                        placeholder={"여기에 일기를 쓰세요"}/>
+                </KeyboardAvoidingView>
                 <View style={styles.buttonArea}>
                     <TouchableOpacity
                         style={styles.button}
@@ -40,7 +121,16 @@ export default class InputScreen extends Component{
                         <Text style={styles.buttonTitle}>저장</Text>
                     </TouchableOpacity>
                 </View>
-            </KeyboardAvoidingView>
+                {this.state.itemId &&
+                <View style={styles.buttonArea}>
+                    <TouchableOpacity
+                        style={{...styles.button, backgroundColor: "red"}}
+                        onPress={this._deleteMemo.bind(this)}>
+                        <Text style={styles.buttonTitle}>삭제</Text>
+                    </TouchableOpacity>
+                </View>
+                }
+            </ScrollView>
         );
     }
 }
@@ -55,7 +145,7 @@ const styles = StyleSheet.create({
     },
     titleArea: {
         width: '100%',
-        padding: wp('10%'),
+        padding: wp('2%'),
         alignItems: 'center',
     },
     title: {
@@ -63,7 +153,7 @@ const styles = StyleSheet.create({
     },
     formArea: {
         width: '100%',
-        paddingBottom: wp('10%'),
+        paddingBottom: wp('5%'),
     },
     textForm: {
         borderWidth: 1,
@@ -73,10 +163,12 @@ const styles = StyleSheet.create({
         paddingLeft: 5,
         paddingRight: 5,
         marginBottom: 5,
+        textAlignVertical: 'top'
     },
     buttonArea: {
         width: '100%',
         height: hp('5%'),
+        marginBottom: wp('5%'),
     },
     button: {
         backgroundColor: "#46c3ad",

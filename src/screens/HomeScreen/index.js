@@ -4,7 +4,8 @@ import {
     Text,
     ScrollView,
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    AsyncStorage
 } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import InputScreen from '../InputScreen';
@@ -23,23 +24,9 @@ class HeaderBar extends Component {
 
 
 export default class HomeScreen extends Component{
-
- /*   static navigationOptions = ({ navigation }) => {
-        return {
-            headerTitle: <HeaderBar />,
-            headerRight: (
-                <Button
-                    onPress={() => alert('This is a button!')}
-                    title="Info"
-                    color="#fff"
-                />
-            ),
-            headerStyle: {
-                backgroundColor: "#F0F0F0",
-                height: "7%"
-            }
-        }
-    }*/
+    state = {
+        memoItems: {}
+    }
 
     static navigationOptions = ({ navigation }) => {
         //return header with Custom View which will replace the original header
@@ -90,19 +77,73 @@ export default class HomeScreen extends Component{
         };
     };
 
+    componentDidMount() {
+        const { navigation } = this.props;
+      //  AsyncStorage.clear();
+        this.loadItems();
+        this.focusListener = navigation.addListener('didFocus', () => {
+            this.loadItems();
+        });
+    }
+
+    componentWillUnmount() {
+        // Remove the event listener
+        this.focusListener.remove();
+    }
+
+    loadItems() {
+        AsyncStorage.getItem("MemoItems", (err, value) => {
+            if(err != null){
+                AsyncStorage.setItem("MemoItems", {}, () => {});
+                return;
+            }
+
+
+            this.setState({
+                memoItems: JSON.parse(value)
+            })
+        })
+    }
+
 
     render(){
+        const { memoItems } = this.state;
+        const { navigation } = this.props;
+        if(memoItems == null)
+            return null;
+
         return (
             <ScrollView style={styles.container}>
-                <View style={styles.wrapContent}>
-                    <View style={styles.content}><Text>List 1</Text></View>
-                </View>
-                <View style={styles.wrapContent}>
-                    <View style={styles.content}><Text>List 2</Text></View>
-                </View>
-                <View style={styles.wrapContent}>
-                    <View style={styles.content}><Text>List 3</Text></View>
-                </View>
+                {
+                    Object.keys(memoItems).map(
+                        function(key) {
+                            const memoPreview = (memoItems[key].memoText.length > 10)?
+                                memoItems[key].memoText.replace(/\n/g, " ").substr(0, 10) + "..." : memoItems[key].memoText
+
+                            const date = new Date(Number(key));
+                            console.log(date)
+                            // const dateString = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDay() + " " +
+                            // date.getHours() + ":" + date.getMinutes();
+
+                            const dateString = date.toString().substr(0, 21);
+
+                            return (
+                                <View style={styles.wrapContent} key={key}>
+                                    <TouchableOpacity
+                                        style={styles.content}
+                                        onPress={() => navigation.navigate('InputScreen', { itemId: key })}>
+                                        <View>
+                                            <Text>{memoPreview}</Text>
+                                        </View>
+                                        <View>
+                                            <Text style={{textAlign: "right"}}>{dateString}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            )
+                        }
+                    )
+                }
             </ScrollView>
         );
     }
@@ -124,5 +165,6 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         backgroundColor: "#46c3ad",
+        padding: wp('2%')
     }
 })

@@ -4,12 +4,10 @@ import {
 } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator, createAppContainer } from 'react-navigation';
 
-import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
-import SettingScreen from './SettingScreen';
-import SomethingScreen from './SomethingScreen';
 import InputScreen from './InputScreen';
 
+/*
 const HomeStack = createStackNavigator(
     {
         HomeScreen
@@ -79,7 +77,7 @@ const TabNavigator = createBottomTabNavigator(
             inactiveTintColor: "#888",
         },
     }
-);
+);*/
 
 const AppStack = createStackNavigator(
     {
