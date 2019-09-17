@@ -12,7 +12,7 @@ Android Studio 및 Android SDK, npm이 설치되어 있다고 가정합니다.
 
 ## 예제 서버 구동법 (Python3)
 pip가 설치되어 있다고 가정합니다. (Anaconda 등 가상 환경에서 실행하는 것을 권장)
-1. websocket_server 폴더로 이동
+1. webserver 폴더로 이동
 2. `pip install -r requirements.txt` 실행
 3. `python flask_server.py` 실행
 
